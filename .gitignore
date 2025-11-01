@@ -1,4 +1,4 @@
-# Created by https://www.gitignore.io/api/visualstudio
+﻿# Created by https://www.gitignore.io/api/visualstudio
 
 ### VisualStudio ###
 ## Ignore Visual Studio temporary files, build results, and
@@ -295,5 +295,12 @@ __pycache__/
 ### VisualStudio Patch ###
 # By default, sensitive information, such as encrypted password
 # should be stored in the .pubxml.user file.
+
+## Other ###
+
+BLOG.md
+PRD.m
+PRD2.md
+
 
 # End of https://www.gitignore.io/api/visualstudio
