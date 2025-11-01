@@ -20,9 +20,29 @@ namespace Nexus_Omok_Game
         private Ellipse? hoverStone = null;
         private Line? winningLine = null;
 
-        public MainWindow()
+        // AI fields
+        private GameSettings gameSettings;
+        private IAIPlayer? aiPlayer;
+        private int aiPlayerNumber;
+        private bool isAIThinking = false;
+
+        // 기본 생성자 (XAML 디자이너용 - 사용되지 않음)
+        public MainWindow() : this(new GameSettings())
+        {
+        }
+
+        // 파라미터 있는 생성자 (실제 사용)
+        public MainWindow(GameSettings settings)
         {
             InitializeComponent();
+            gameSettings = settings;
+
+            if (gameSettings.Mode == GameMode.VsAI)
+            {
+                aiPlayer = AIPlayerFactory.Create(gameSettings.AIDifficulty);
+                aiPlayerNumber = gameSettings.IsPlayerBlack ? 2 : 1;
+            }
+
             InitializeGame();
         }
 
@@ -40,12 +60,28 @@ namespace Nexus_Omok_Game
             gameOver = false;
             hoverStone = null;
             winningLine = null;
+            isAIThinking = false;
 
             GameCanvas.Children.Clear();
             DrawBoard();
 
             UpdateTurnDisplay();
-            StatusText.Text = "Welcome to Nexus Omok Game! Black plays first. (3-3 rule enabled)";
+
+            if (gameSettings.Mode == GameMode.VsAI)
+            {
+                string diffText = gameSettings.AIDifficulty == AIDifficulty.Easy ? "Easy" :
+           gameSettings.AIDifficulty == AIDifficulty.Normal ? "Normal" : "Hard";
+                StatusText.Text = $"AI Mode - Difficulty: {diffText}";
+
+                if (aiPlayerNumber == 1)
+                {
+                    _ = ExecuteAIMove();
+                }
+            }
+            else
+            {
+                StatusText.Text = "Welcome to Nexus Omok Game! Black plays first.";
+            }
         }
 
         private void DrawBoard()
@@ -101,6 +137,18 @@ namespace Nexus_Omok_Game
                 return;
             }
 
+            if (isAIThinking)
+            {
+                StatusText.Text = "AI is thinking... Please wait.";
+                return;
+            }
+
+            if (gameSettings.Mode == GameMode.VsAI && currentPlayer == aiPlayerNumber)
+            {
+                StatusText.Text = "It's AI's turn. Please wait.";
+                return;
+            }
+
             Point clickPoint = e.GetPosition(GameCanvas);
             var (row, col) = GetNearestIntersection(clickPoint);
 
@@ -116,29 +164,7 @@ namespace Nexus_Omok_Game
                         return;
                     }
 
-                    board[row, col] = currentPlayer;
-                    DrawStone(row, col, currentPlayer);
-                    PlaySound();
-
-                    if (CheckWin(row, col, currentPlayer))
-                    {
-                        gameOver = true;
-                        string winner = currentPlayer == 1 ? "Black" : "White";
-                        StatusText.Text = $"{winner} wins! Congratulations!";
-                        StatusText.FontSize = 24;
-                        StatusText.Foreground = currentPlayer == 1 ? Brushes.DarkSlateGray : Brushes.WhiteSmoke;
-                        return;
-                    }
-
-                    if (IsBoardFull())
-                    {
-                        gameOver = true;
-                        StatusText.Text = "Draw! The board is full.";
-                        return;
-                    }
-
-                    currentPlayer = currentPlayer == 1 ? 2 : 1;
-                    UpdateTurnDisplay();
+                    PlaceStoneAndCheckGame(row, col);
                 }
                 else
                 {
@@ -147,9 +173,89 @@ namespace Nexus_Omok_Game
             }
         }
 
+        private void PlaceStoneAndCheckGame(int row, int col)
+        {
+            board[row, col] = currentPlayer;
+            DrawStone(row, col, currentPlayer);
+            PlaySound();
+
+            if (CheckWin(row, col, currentPlayer))
+            {
+                gameOver = true;
+                string winner = GetPlayerName(currentPlayer);
+                StatusText.Text = $"{winner} wins! Congratulations!";
+                StatusText.FontSize = 24;
+                StatusText.Foreground = currentPlayer == 1 ? Brushes.DarkSlateGray : Brushes.WhiteSmoke;
+                return;
+            }
+
+            if (IsBoardFull())
+            {
+                gameOver = true;
+                StatusText.Text = "Draw! The board is full.";
+                return;
+            }
+
+            currentPlayer = currentPlayer == 1 ? 2 : 1;
+            UpdateTurnDisplay();
+
+            if (gameSettings.Mode == GameMode.VsAI && currentPlayer == aiPlayerNumber)
+            {
+                _ = ExecuteAIMove();
+            }
+        }
+
+        private string GetPlayerName(int player)
+        {
+            if (gameSettings.Mode == GameMode.VsAI)
+            {
+                if (player == aiPlayerNumber)
+                    return "AI";
+                else
+                    return "You";
+            }
+            else
+            {
+                return player == 1 ? "Black" : "White";
+            }
+        }
+
+        private async Task ExecuteAIMove()
+        {
+            isAIThinking = true;
+            StatusText.Text = "AI is thinking...";
+            StatusText.Foreground = Brushes.Orange;
+            GameCanvas.IsEnabled = false;
+
+            try
+            {
+                var (row, col) = await aiPlayer!.GetNextMoveAsync(board, aiPlayerNumber);
+                await Task.Delay(new Random().Next(500, 1500));
+
+                PlaceStoneAndCheckGame(row, col);
+
+                StatusText.Text = "AI placed a stone!";
+                StatusText.Foreground = Brushes.White;
+            }
+            catch (Exception ex)
+            {
+                StatusText.Text = $"AI Error: {ex.Message}";
+                StatusText.Foreground = Brushes.Red;
+            }
+            finally
+            {
+                isAIThinking = false;
+                GameCanvas.IsEnabled = true;
+            }
+        }
+
         private void GameCanvas_MouseMove(object sender, MouseEventArgs e)
         {
             if (gameOver) return;
+            if (isAIThinking) return;
+
+            if (gameSettings.Mode == GameMode.VsAI && currentPlayer == aiPlayerNumber)
+                return;
 
             Point mousePoint = e.GetPosition(GameCanvas);
             var (row, col) = GetNearestIntersection(mousePoint);
@@ -165,9 +271,9 @@ namespace Nexus_Omok_Game
                 {
                     Width = STONE_RADIUS * 2,
                     Height = STONE_RADIUS * 2,
-                    Fill = currentPlayer == 1 ? 
-                        new SolidColorBrush(Color.FromArgb(100, 0, 0, 0)) : 
-                        new SolidColorBrush(Color.FromArgb(100, 255, 255, 255)),
+                    Fill = currentPlayer == 1 ?
+new SolidColorBrush(Color.FromArgb(100, 0, 0, 0)) :
+ new SolidColorBrush(Color.FromArgb(100, 255, 255, 255)),
                     Stroke = Brushes.Gray,
                     StrokeThickness = 1,
                     IsHitTestVisible = false
@@ -241,12 +347,12 @@ namespace Nexus_Omok_Game
         private bool CheckWin(int lastRow, int lastCol, int player)
         {
             int[][] directions = new int[][]
-            {
+      {
                 new int[] { 0, 1 },
-                new int[] { 1, 0 },
-                new int[] { 1, 1 },
-                new int[] { 1, -1 }
-            };
+       new int[] { 1, 0 },
+        new int[] { 1, 1 },
+     new int[] { 1, -1 }
+        };
 
             foreach (var dir in directions)
             {
@@ -318,16 +424,40 @@ namespace Nexus_Omok_Game
 
         private void UpdateTurnDisplay()
         {
-            if (currentPlayer == 1)
+            string turnText;
+            string statusText;
+
+            if (gameSettings.Mode == GameMode.VsAI)
             {
-                CurrentTurnText.Text = "Current Turn: Black";
-                StatusText.Text = "Black's turn to play.";
+                if (currentPlayer == aiPlayerNumber)
+                {
+                    string aiColor = aiPlayerNumber == 1 ? "Black" : "White";
+                    turnText = $"Current Turn: AI ({aiColor})";
+                    statusText = "AI's turn to play.";
+                }
+                else
+                {
+                    string playerColor = aiPlayerNumber == 1 ? "White" : "Black";
+                    turnText = $"Current Turn: You ({playerColor})";
+                    statusText = "Your turn to play.";
+                }
             }
             else
             {
-                CurrentTurnText.Text = "Current Turn: White";
-                StatusText.Text = "White's turn to play.";
+                if (currentPlayer == 1)
+                {
+                    turnText = "Current Turn: Black";
+                    statusText = "Black's turn to play.";
+                }
+                else
+                {
+                    turnText = "Current Turn: White";
+                    statusText = "White's turn to play.";
+                }
             }
+
+            CurrentTurnText.Text = turnText;
+            StatusText.Text = statusText;
             StatusText.FontSize = 20;
             StatusText.Foreground = Brushes.White;
         }
@@ -357,10 +487,10 @@ namespace Nexus_Omok_Game
         private void NewGameButton_Click(object sender, RoutedEventArgs e)
         {
             MessageBoxResult result = MessageBox.Show(
-                "Are you sure you want to start a new game?",
-                "New Game",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
+           "Are you sure you want to start a new game?",
+          "New Game",
+                    MessageBoxButton.YesNo,
+        MessageBoxImage.Question);
 
             if (result == MessageBoxResult.Yes)
             {
@@ -372,12 +502,12 @@ namespace Nexus_Omok_Game
         {
             int openThreeCount = 0;
             int[][] directions = new int[][]
-            {
+       {
                 new int[] { 0, 1 },
-                new int[] { 1, 0 },
-                new int[] { 1, 1 },
-                new int[] { 1, -1 }
-            };
+       new int[] { 1, 0 },
+     new int[] { 1, 1 },
+       new int[] { 1, -1 }
+       };
 
             board[row, col] = 1;
 
@@ -396,7 +526,6 @@ namespace Nexus_Omok_Game
 
         private bool CountOpenThree(int row, int col, int dRow, int dCol)
         {
-            int count = 1;
             int posCount = 0;
             int negCount = 0;
 
@@ -420,7 +549,7 @@ namespace Nexus_Omok_Game
             }
             bool negOpen = (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE && board[r, c] == 0);
 
-            count = 1 + posCount + negCount;
+            int count = 1 + posCount + negCount;
 
             return count == 3 && posOpen && negOpen;
         }

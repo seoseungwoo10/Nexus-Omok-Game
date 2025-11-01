@@ -1,0 +1,109 @@
+﻿<Window x:Class="Nexus_Omok_Game.AIDifficultyWindow"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="AI 난이도 선택" 
+     Height="450" Width="500"
+  WindowStartupLocation="CenterScreen"
+ Background="#F5F5DC"
+   ResizeMode="NoResize">
+    <Grid>
+ <Grid.RowDefinitions>
+   <RowDefinition Height="80"/>
+     <RowDefinition Height="*"/>
+        <RowDefinition Height="80"/>
+   </Grid.RowDefinitions>
+
+   <!-- Title -->
+        <Border Grid.Row="0" Background="#8B4513" Padding="20">
+      <TextBlock Text="🤖 AI 난이도 선택" 
+       FontSize="28" 
+          FontWeight="Bold" 
+       Foreground="White"
+     HorizontalAlignment="Center"
+            VerticalAlignment="Center"/>
+        </Border>
+
+        <!-- Difficulty Options -->
+        <StackPanel Grid.Row="1" Margin="40,20">
+   
+         <!-- 쉬움 -->
+     <RadioButton x:Name="EasyRadio" 
+        GroupName="Difficulty"
+             IsChecked="True"
+      Margin="0,10">
+       <StackPanel>
+  <TextBlock Text="🟢 쉬움 - 초보자에게 적합" 
+      FontSize="20" 
+         FontWeight="Bold"/>
+   <TextBlock Text="AI가 실수를 자주 합니다. 초보자도 쉽게 승리할 수 있습니다." 
+     FontSize="14" 
+              Foreground="Gray"
+      Margin="25,5,0,0"
+ TextWrapping="Wrap"/>
+       </StackPanel>
+    </RadioButton>
+
+   <!-- 보통 -->
+            <RadioButton x:Name="NormalRadio" 
+     GroupName="Difficulty"
+    IsEnabled="False"
+    Margin="0,20,0,10">
+       <StackPanel>
+        <TextBlock FontSize="20" FontWeight="Bold">
+        <Run Text="🟡 보통 - 중급자에게 적합"/>
+      <Run Text=" (개발 예정)" FontSize="14" Foreground="Orange"/>
+      </TextBlock>
+     <TextBlock Text="균형잡힌 플레이. 전략적 사고가 필요합니다." 
+   FontSize="14" 
+    Foreground="Gray"
+        Margin="25,5,0,0"
+           TextWrapping="Wrap"/>
+     </StackPanel>
+   </RadioButton>
+
+            <!-- 어려움 -->
+   <RadioButton x:Name="HardRadio" 
+       GroupName="Difficulty"
+  IsEnabled="False"
+    Margin="0,20,0,10">
+ <StackPanel>
+     <TextBlock FontSize="20" FontWeight="Bold">
+   <Run Text="🔴 어려움 - 고수에게 도전적"/>
+     <Run Text=" (개발 예정)" FontSize="14" Foreground="Orange"/>
+       </TextBlock>
+ <TextBlock Text="전략적인 AI. 숙련된 플레이어에게도 어려운 상대입니다." 
+         FontSize="14" 
+           Foreground="Gray"
+    Margin="25,5,0,0"
+   TextWrapping="Wrap"/>
+       </StackPanel>
+     </RadioButton>
+
+     </StackPanel>
+
+     <!-- Buttons -->
+        <Border Grid.Row="2" Background="#8B4513" Padding="20">
+            <StackPanel Orientation="Horizontal" 
+       HorizontalAlignment="Center">
+     <Button x:Name="ConfirmButton" 
+      Content="✓ 확인" 
+    Width="120" 
+         Height="40"
+ FontSize="18"
+     FontWeight="Bold"
+           Background="#FFD700"
+             Margin="10,0"
+   Click="ConfirmButton_Click"/>
+           <Button x:Name="CancelButton" 
+    Content="✗ 취소" 
+      Width="120" 
+    Height="40"
+             FontSize="18"
+   FontWeight="Bold"
+        Background="#D3D3D3"
+       Margin="10,0"
+      Click="CancelButton_Click"/>
+   </StackPanel>
+        </Border>
+    </Grid>
+</Window>
