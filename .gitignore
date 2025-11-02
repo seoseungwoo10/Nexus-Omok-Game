@@ -295,12 +295,14 @@ __pycache__/
 ### VisualStudio Patch ###
 # By default, sensitive information, such as encrypted password
 # should be stored in the .pubxml.user file.
+# End of https://www.gitignore.io/api/visualstudio
+
 
 ## Other ###
 
 BLOG.md
-PRD.m
-PRD2.md
-
-
-# End of https://www.gitignore.io/api/visualstudio
+PRD.md
+PRD_AI.md
+PRD_AI_ChatGPT_Addon.md
+FIX_*.md
+RAPFI/
