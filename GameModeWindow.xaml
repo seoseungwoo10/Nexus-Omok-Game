@@ -1,0 +1,98 @@
+﻿<Window x:Class="Nexus_Omok_Game.GameModeWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Nexus Omok Game - 게임 모드 선택" 
+      Height="400" Width="600"
+        WindowStartupLocation="CenterScreen"
+   Background="#F5F5DC"
+        ResizeMode="NoResize">
+    <Grid>
+        <Grid.RowDefinitions>
+  <RowDefinition Height="100"/>
+            <RowDefinition Height="*"/>
+       <RowDefinition Height="80"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <Border Grid.Row="0" Background="#8B4513" Padding="20">
+       <TextBlock Text="🎮 게임 모드를 선택하세요" 
+           FontSize="32" 
+     FontWeight="Bold" 
+    Foreground="White"
+              HorizontalAlignment="Center"
+         VerticalAlignment="Center"/>
+        </Border>
+
+     <!-- Mode Buttons -->
+        <StackPanel Grid.Row="1" 
+      Orientation="Horizontal" 
+    HorizontalAlignment="Center" 
+          VerticalAlignment="Center">
+ 
+            <!-- 2인 플레이 버튼 -->
+   <Border BorderBrush="#8B4513" 
+         BorderThickness="3" 
+      CornerRadius="10" 
+             Margin="10"
+             Background="White">
+      <Button x:Name="TwoPlayerButton"
+        Width="220" 
+    Height="180"
+                 Background="Transparent"
+  BorderThickness="0"
+                Cursor="Hand"
+              Click="TwoPlayerButton_Click">
+      <StackPanel>
+      <TextBlock Text="👥" FontSize="60" HorizontalAlignment="Center"/>
+       <TextBlock Text="2인 플레이" 
+        FontSize="24" 
+    FontWeight="Bold" 
+   HorizontalAlignment="Center"
+   Margin="0,10,0,5"/>
+ <TextBlock Text="친구와 함께" 
+       FontSize="16" 
+      Foreground="Gray"
+   HorizontalAlignment="Center"/>
+             </StackPanel>
+     </Button>
+    </Border>
+
+       <!-- AI 상대 버튼 -->
+            <Border BorderBrush="#8B4513" 
+        BorderThickness="3" 
+         CornerRadius="10" 
+     Margin="10"
+   Background="White">
+        <Button x:Name="AIButton"
+        Width="220" 
+        Height="180"
+   Background="Transparent"
+       BorderThickness="0"
+            Cursor="Hand"
+     Click="AIButton_Click">
+         <StackPanel>
+       <TextBlock Text="🤖" FontSize="60" HorizontalAlignment="Center"/>
+     <TextBlock Text="AI 상대" 
+         FontSize="24" 
+          FontWeight="Bold" 
+         HorizontalAlignment="Center"
+   Margin="0,10,0,5"/>
+   <TextBlock Text="혼자서 즐기기" 
+  FontSize="16" 
+Foreground="Gray"
+            HorizontalAlignment="Center"/>
+        </StackPanel>
+            </Button>
+     </Border>
+        </StackPanel>
+
+        <!-- Footer -->
+        <Border Grid.Row="2" Background="#8B4513" Padding="10">
+   <TextBlock Text="넥서스 오목 게임에 오신 것을 환영합니다!" 
+     FontSize="16" 
+      Foreground="White"
+    HorizontalAlignment="Center"
+            VerticalAlignment="Center"/>
+        </Border>
+ </Grid>
+</Window>
